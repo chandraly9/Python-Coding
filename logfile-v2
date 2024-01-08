@@ -1,0 +1,45 @@
+2024-01-08 03:36:23,319 - DEBUG - Config file found at C:\Users\Satish Loyapally\.oci\config
+2024-01-08 03:36:23,379 - DEBUG - Starting new HTTPS connection (1): objectstorage.us-phoenix-1.oraclecloud.com:443
+2024-01-08 03:36:24,071 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "GET /n HTTP/1.1" 200 14
+2024-01-08 03:36:24,897 - INFO - Logged in and selected inbox successfully.
+2024-01-08 03:36:24,897 - INFO - Checking for new invoices...
+2024-01-08 03:36:25,419 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:25,419 - INFO - Uploaded Invoice-Template-1-Excel-1-test.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:25,671 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:25,673 - INFO - Uploaded Invoice-Template-1-Excel-1-test.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:25,962 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:25,963 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:26,394 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test001.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:26,394 - INFO - Uploaded Invoice-Template-1-Excel-1-test001.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:26,629 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test002.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:26,629 - INFO - Uploaded Invoice-Template-1-Excel-1-test002.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:26,867 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test001.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:26,867 - INFO - Uploaded Invoice-Template-1-Excel-1-test001.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:27,163 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:27,164 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:27,414 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:27,415 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:27,625 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:27,626 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:27,834 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test001.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:27,835 - INFO - Uploaded Invoice-Template-1-Excel-1-test001.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:28,108 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test002.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:28,108 - INFO - Uploaded Invoice-Template-1-Excel-1-test002.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:28,419 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test001a.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:28,420 - INFO - Uploaded Invoice-Template-1-Excel-1-test001a.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:28,639 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:28,640 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:28,979 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:28,980 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:29,258 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:29,259 - INFO - Uploaded Invoice-Template-1-Excel.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:29,509 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test001a.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:29,510 - INFO - Uploaded Invoice-Template-1-Excel-1-test001a.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:29,800 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test002.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:29,800 - INFO - Uploaded Invoice-Template-1-Excel-1-test002.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:36:30,034 - DEBUG - https://objectstorage.us-phoenix-1.oraclecloud.com:443 "PUT /n/axmzurahjoxo/b/Test_bucket/o/Invoice-Template-1-Excel-1-test01.xlsx HTTP/1.1" 200 0
+2024-01-08 03:36:30,035 - INFO - Uploaded Invoice-Template-1-Excel-1-test01.xlsx to OCI Object Storage in bucket Test_bucket
+2024-01-08 03:37:30,035 - INFO - Checking for new invoices...
+2024-01-08 03:38:33,596 - INFO - Checking for new invoices...
+2024-01-08 03:39:36,033 - INFO - Checking for new invoices...
+2024-01-08 03:40:39,198 - INFO - Checking for new invoices...
