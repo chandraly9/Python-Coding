@@ -1,0 +1,27 @@
+[4:28 PM] Hiatt, Steve
+https://jira.nordstrom.com/browse/NETSEC-3599
+Nordstrom :: ServiceNow
+[4:30 PM] Hiatt, Steve
+https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9994&quickFilter=78943
+Nordstrom :: ServiceNow
+[4:53 PM] Hiatt, Steve
+https://github.com/a10networks/terraform-provider-thunder/tree/master
+GitHub - a10networks/terraform-provider-thunder: terraform-provider-thunder
+terraform-provider-thunder. Contribute to a10networks/terraform-provider-thunder development by creating an account on GitHub.
+[4:54 PM] Ervin, Brian
+Standard Pipeline: https://developers.nordstromaws.app/docs/TM01090/app02944-customer-docs-doctails/pipeline/overview/
+[4:55 PM] Ervin, Brian
+^ the above is from the Dev Portal. There is a lot of details here around Nordstrom standards, how supported applications should be built, etc. 
+[5:00 PM] Ervin, Brian
+Example repo with Terraform for one of my team's apps deployed to AWS. State is managed by Gitlab: https://git.jwn.app/TM01327/NetworkConfigManager/APP08734-Infrastructure
+[5:10 PM] Hiatt, Steve
+afk for a sec. Bathroom
+[5:23 PM] Ervin, Brian
+https://composer.nordstromaws.app/
+[5:25 PM] Ervin, Brian
+TECH_NetworkSecurity
+[5:27 PM] Ervin, Brian
+Composer pack development guide: https://confluence.nordstrom.com/display/InfrastructureEnablement/Pack+Development
+Nordstrom :: ServiceNow
+[5:29 PM] Ervin, Brian
+Composer packs: https://git.jwn.app/TM01327/composer/APP07463-Packs
