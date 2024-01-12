@@ -14,8 +14,8 @@ logging.basicConfig(filename='C:\\ai\\emaillogfile_v3.log',
 
 # Gmail credentials and server details
 imap_host = 'imap.gmail.com'
-imap_user = 'schandraly@gmail.com'
-imap_pass = 'adwytpkzzvmgybck'
+imap_user = 'AI-Testing@beastute.com'
+imap_pass = 'Info$786Info$786'
 
 # OCI Config setup
 config = oci.config.from_file("C:\\Users\\Satish Loyapally\\.oci\\config")
