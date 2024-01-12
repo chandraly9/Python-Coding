@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import oci  # Ensure you've installed the OCI Python SDK
 
 # Setup logging
-logging.basicConfig(filename='C:\\ai\\emaillogfile_v3.log',
+logging.basicConfig(filename='/home/opc/invoiceAi/emaillogfile_v3.log',
                     filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
