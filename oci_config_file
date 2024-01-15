@@ -1,0 +1,6 @@
+[DEFAULT]
+user=ocid1.user.oc1..aaaaaaaacmgguov2mh6o2nppmwf25c2emyuebws6h35i7w6xws7f3i6ktsoq
+fingerprint=19:0f:23:21:42:b8:01:72:ac:ef:da:b8:80:5f:ce:e4
+key_file=C:\Users\Satish Loyapally\.oci\scocitest01.pem
+tenancy=ocid1.tenancy.oc1..aaaaaaaamtos7stx4wa7qnwjszxy6he274tw4ngl6ifhsv5ilyvy6e6hmkgq
+region=us-phoenix-1
