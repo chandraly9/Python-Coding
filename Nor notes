@@ -216,5 +216,25 @@ Disaster Recovery Plan: Outline a disaster recovery plan within the documentatio
 By adding these points, we reinforce our project's thoroughness, from initial requirement gathering to post-deployment procedures. These sub-tasks will help in ensuring a well-rounded approach, addressing potential gaps, and ensuring that all necessary technical elements are considered and accounted for within the project plan.
 
 ****************************
-****
+JIRA Story: Conduct Security Review for Automation Scripts
 
+Sub-task: Perform static code analysis on Python and Terraform scripts.
+Sub-task: Conduct vulnerability assessment for code dependencies.
+Sub-task: Schedule and execute penetration testing for the automation workflow.
+Sub-task: Review and apply best security practices for coding standards.
+Sub-task: Document any findings and remediate identified security risks.
+JIRA Story: Ensure Compliance with Regulatory Standards
+
+Sub-task: Map compliance requirements to automation process steps.
+Sub-task: Review Terraform and Python scripts for compliance adherence.
+Sub-task: Conduct an audit trail review and validation check.
+Sub-task: Update scripts and workflows based on compliance feedback.
+Sub-task: Create a compliance report and obtain sign-off from the compliance officer.
+JIRA Story: Develop and Document a Disaster Recovery Plan
+
+Sub-task: Identify critical components of the automation system.
+Sub-task: Outline recovery procedures for each critical component.
+Sub-task: Define recovery time objectives (RTOs) and recovery point objectives (RPOs).
+Sub-task: Create a disaster recovery runbook with detailed instructions.
+Sub-task: Test the disaster recovery plan in a staged environment.
+Sub-task: Train the team on disaster recovery procedures.
