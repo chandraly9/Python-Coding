@@ -12,35 +12,37 @@ Planning and Requirements Gathering:
 
 Finalizing the YAML configurations for the load balancers.
 Understanding the specific automation needs for server management within service groups.
-Design and Prototyping:
 
+Design and Prototyping:
 Creating the initial sequence diagrams.
 Drafting a prototype Python script for parsing YAML configurations.
-Development and Testing:
 
+Development and Testing:
 Writing the Terraform configurations based on the Python script output.
 Executing configurations in a test environment to ensure accuracy and efficiency.
 Integration and Continuous Deployment Setup:
 
 Integrating the Terraform configurations with our CI/CD pipeline.
 Ensuring smooth and automated deployment processes.
-Monitoring and Alerting Configuration:
 
+Monitoring and Alerting Configuration:
 Implementing the monitoring systems within Terraform.
 Setting up alerting mechanisms for system notifications.
-Review and Optimization:
 
+Review and Optimization:
 Assessing the automation flow and making necessary refinements.
-Optimizing the Python and Terraform scripts for better performance and reliability.
+Optimizing the YAML, Python and Terraform scripts for better performance and reliability.
+
 Documentation and Knowledge Transfer:
 
 Completing comprehensive documentation for all phases.
 Training and transferring knowledge to relevant teams for ongoing management.
+
 First Milestone
 The first milestone we aim to hit is the successful Development and Testing of Terraform configurations that automate the addition, removal, and adjustment of servers within the service groups. This is a significant step as it establishes the foundation for further automation and ensures that our core functionalities are operational.
 
 Project Commencement
-We are scheduled to start the Planning and Requirements Gathering phase immediately, with the aim to begin Development and Testing within the next two weeks. This will allow us to hit our first milestone promptly.
+We are scheduled to start the Planning and Requirements Gathering phase immediately, with the aim to begin Development within the next few weeks. This will allow us to hit our first milestone promptly.
 
 I hope this gives a clear picture of our development roadmap and timelines. If there are any specific areas you would like to discuss or prioritize differently, please let me know, and we can adjust our plans accordingly.
 
