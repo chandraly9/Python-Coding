@@ -26,3 +26,13 @@ Nordstrom :: ServiceNow
 [5:29 PM] Ervin, Brian
 Composer packs: https://git.jwn.app/TM01327/composer/APP07463-Packs
 https://confluence.nordstrom.com/display/SNAAP/Network+Security
+
+
+
+Thanks for the detailed plan. This process makes sense, but I have a few comments.
+
+ 
+
+“Development and Testing” section contains some duplicate items
+“Task: Integrate Terraform with A10 Thunder Provider” task seems like a duplication of the previous task. You will need to integrate the provider to develop the service group management code, right?
+“Sub-task: Schedule and execute penetration testing for the automation workflow.” – what will be tested here? Does this solution include any server endpoints or just CI/CD job execution?
