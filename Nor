@@ -1,1 +1,109 @@
 
+Steve Hiatt
+:house_with_garden:  4:33 PM
+admin / crispybac0n!
+
+https://git.jwn.app/TM01026/APP05103-Infrastructure
+
+https://git.jwn.app/search?search=APP05103-Infrastructure&nav_source=navbar
+
+[Monday 4:28 PM] Hiatt, Steve
+https://jira.nordstrom.com/browse/NETSEC-3599
+Nordstrom :: ServiceNow
+[Monday 4:30 PM] Hiatt, Steve
+https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9994&quickFilter=78943
+Nordstrom :: ServiceNow
+[Monday 4:53 PM] Hiatt, Steve
+https://github.com/a10networks/terraform-provider-thunder/tree/master
+GitHub - a10networks/terraform-provider-thunder: terraform-provider-thunder
+terraform-provider-thunder. Contribute to a10networks/terraform-provider-thunder development by creating an account on GitHub.
+[Monday 4:54 PM] Ervin, Brian
+Standard Pipeline: https://developers.nordstromaws.app/docs/TM01090/app02944-customer-docs-doctails/pipeline/overview/
+[Monday 4:55 PM] Ervin, Brian
+^ the above is from the Dev Portal. There is a lot of details here around Nordstrom standards, how supported applications should be built, etc. 
+[Monday 5:00 PM] Ervin, Brian
+Example repo with Terraform for one of my team's apps deployed to AWS. State is managed by Gitlab: https://git.jwn.app/TM01327/NetworkConfigManager/APP08734-Infrastructure
+[Monday 5:10 PM] Hiatt, Steve
+afk for a sec. Bathroom
+[Monday 5:23 PM] Ervin, Brian
+https://composer.nordstromaws.app/
+[Monday 5:25 PM] Ervin, Brian
+TECH_NetworkSecurity
+[Monday 5:27 PM] Ervin, Brian
+Composer pack development guide: https://confluence.nordstrom.com/display/InfrastructureEnablement/Pack+Development
+Nordstrom :: ServiceNow
+[Monday 5:29 PM] Ervin, Brian
+Composer packs: https://git.jwn.app/TM01327/composer/APP07463-Packs
+
+Jira board for Netsec: https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9994&projectKey=NETSEC jira is used to monitor our work pertaining to efforts, projects, mini-projects/efforts. anything that is beyond the realm of SNow tickets or translating SNow ticket to tangible work.
+
+
+animesh.anand
+  1 day ago
+Confluence link to our SNAAP directory(that is our bigger team name): https://confluence.nordstrom.com/display/SNAAP/
+
+
+animesh.anand
+  1 day ago
+GitLab repo for netsec: https://git.jwn.app/TM00390
+
+
+animesh.anand
+  1 day ago
+Our ISS dashboard on SNow: https://nordstrom.service-now.com/nav_to.do?uri=%2F$pa_dashboard.do you can navigate to assigned users, team(our team assignment is Network Security -Tier 2).
+
+
+animesh.anand
+  1 day ago
+Group id: it is utilized for managing group/user-membership https://groupid.nordstrom.app/GroupID/Home/Index
+
+
+animesh.anand
+  1 day ago
+Nerds: it is a wonderful tool to understand about our tools/product. every product we support is assigned with a appid. https://nordstrom.service-now.com/nerds?spa=1&s=
+
+
+animesh.anand
+  1 day ago
+that's all i think is important and are frequently used enterprise tools
+
+Bradley Lund
+  6 days ago
+https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9582
+
+
+Bradley Lund
+  6 days ago
+Is our jira board. On the left hand side there is a stacked icon for backlog.
+
+
+Bradley Lund
+  6 days ago
+We have a meeting to review our backlog today, we should use the time to discuss automation priorities.
+
+
+Bradley Lund
+  6 days ago
+https://confluence.nordstrom.com/display/SNAAP/
+
+
+Bradley Lund
+  6 days ago
+Is our teams main page. We should grab some time and I'll show you around.
+Current and historical documentation is a little mixed.
+
+
+satish.chandra
+  6 days ago
+Thank you Bradley
+
+
+
+Availability: Listed on the Terraform Registry https://registry.terraform.io/namespaces/a10networks
+Capabilities: This provider offers basic functionalities for managing A10 load balancers. While it covers standard use cases, it might lack advanced features or specific customizations we require.
+Community-Driven Provider - a10networks/a10-terraform
+Availability: Hosted on GitHub https://github.com/a10networks/terraform-provider-thunder
+
+
+
+
