@@ -1,0 +1,49 @@
+A10 Load Balancer Automation Architecture Documentation
+Overview
+This document provides an overview of the architecture for the A10 Load Balancer Automation project. The project utilizes Terraform for automating the configuration and deployment of A10 Load Balancers in various environments.
+
+Architectural Components
+Configurations
+Load Balancing Methods:
+
+Round-Robin: Distributes traffic evenly across servers.
+Least Connections: Directs traffic to the server with the fewest active connections.
+IP-Hash: Selects a server based on a hash of the source IP.
+SSL Configurations:
+
+SSL Certificates: Specifies paths to SSL certificate files.
+SSL Private Keys: Defines paths to SSL private key files.
+SSL Enable/Disable: Toggles SSL encryption on/off.
+Advanced Routing:
+
+Health Checks: Monitors server health to ensure traffic is only sent to operational servers.
+Persistence Settings: Maintains client connection persistence for session consistency.
+Environment-Specific Configurations
+Development Environment: Configurations tailored for the development environment, including specific servers and service groups.
+Staging Environment: Staging-specific configurations to simulate production-like settings.
+Production Environment: Production-level configurations for live traffic handling.
+Terraform Integration
+Terraform Modules:
+
+Servers Module: Manages the configuration of individual servers.
+Service Group Module: Handles the setup of service groups.
+VIP Module: Configures Virtual IP settings.
+Environment Selection Logic: Implements dynamic configuration selection based on the specified environment (Development, Staging, Production).
+
+Infrastructure
+Servers:
+Real Server 1 & 2: Physical or virtual servers managed by the load balancer.
+Service Groups:
+Service Group 1 & 2: Groups of servers managed together for load balancing.
+Virtual IP (VIP):
+VIP Configuration: Settings for the virtual server address.
+Associated Port and Protocol Settings: Defines the ports and protocols used by the VIP.
+Version Control and Documentation
+Git Repository:
+Version Tracking: Manages changes and versions of the Terraform configurations.
+Change Management: Tracks and documents changes made to the configurations.
+Documentation:
+Configuration Guides: Detailed instructions and explanations of the Terraform configurations.
+Environment-Specific Details: Documentation tailored to each deployment environment.
+Conclusion
+This architecture provides a comprehensive, scalable, and flexible approach to automating A10 Load Balancer configurations using Terraform. It ensures efficient management of load balancing in different environments, adhering to best practices in infrastructure automation.
