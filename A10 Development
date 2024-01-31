@@ -1,0 +1,22 @@
+The lab a10 load balancer IP is 10.228.34.212
+10.228.34.193
+
+servers:
+  real_server_1:
+    name: "0990t05103hc01"
+    host: "10.230.72.133"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+  real_server_2:
+    name: "0990t05103hc02"
+    host: "10.230.72.139"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+
+        you can see that they have a web service running, giving different responses
