@@ -260,4 +260,4 @@ Modify a Partition Group: The thunder_partition_group configuration corresponds 
 These configurations are part of the Thunder Terraform Provider Version 1.4.1 and are documented on pages 210, 211, and 224 of the provided PDF
 1
 . The Terraform provider leverages the ACOS-aXAPI to interact with A10 devices, allowing for the automation of configuration tasks related to service partitions and L3V.
-To utilize these configurations, you would define the appropriate resources in your Terraform configuration files and apply them using Terraform commands. This enables the management of A10 Thunder ADC resources in a declarative manner, consistent with infrastructure as code (IaC) practices.
+To utilize these configurations, we would define the appropriate resources in your Terraform configuration files and apply them using Terraform commands. This enables the management of A10 Thunder ADC resources in a declarative manner, consistent with infrastructure as code (IaC) practices.
