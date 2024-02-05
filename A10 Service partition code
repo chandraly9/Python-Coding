@@ -224,3 +224,40 @@ If issues arise post-swap, you can quickly reverse the process by updating the s
 Remember, this is a high-level overview and the actual implementation will depend on your specific requirements and environment. You should refer to the A10 Terraform Provider documentation
 1
  and your CI/CD tool's documentation for more detailed information.
+
+*****************
+
+Based on the information provided from the A10 Thunder Terraform Provider (TTP) documentation (Version 1.4.1), it is confirmed that the A10 Terraform provider supports managing resources under both Layer 3 Virtualization (L3V) and service partitions. The documentation specifically mentions new Thunder configurations related to cloud services, service partition, and Thunder operational statuses
+1
+.
+For service partitions, the documentation details the following configurations along with their equivalent ACOS-aXAPI URIs:
+Service Partition: The thunder_service_partition configuration corresponds to the /axapi/v3/service-partition/{partition-name} URI and is used to create or unload a service partition
+1
+.
+Regarding network partitions (which may relate to L3V), the documentation provides configurations for:
+Network Partition: The thunder_partition configuration corresponds to /axapi/v3/partition/{partition-name} and is used to create or unload a network partition
+1
+.
+Shared VLAN in Network Partition: The thunder_partition_shared_vlan configuration corresponds to /axapi/v3/partition/{partition-name}/shared-vlan and enables the shared VLAN feature in a network partition
+1
+.
+Network Partition Statistics: The thunder_partition_stats configuration corresponds to /axapi/v3/partition/{partition-name}/stats and provides statistics for the network partition
+1
+.
+Attach Template to Partition: The thunder_partition_template configuration corresponds to /axapi/v3/partition/{partition-name}/template and is used to attach a template to the partition
+1
+.
+Additionally, configurations for operational status checks and managing partition groups are included:
+Operational Status for Partition-All: The thunder_partition_all_oper configuration corresponds to /axapi/v3/partition-all/oper and provides operational status for the object partition-all
+1
+.
+Operational Status for Available Partition ID: The thunder_partition_available_id_oper configuration corresponds to /axapi/v3/partition-available-id/oper and provides operational status for the object partition-available-id
+1
+.
+Modify a Partition Group: The thunder_partition_group configuration corresponds to /axapi/v3/partition-group/{partition-group-name} and is used to modify a partition group
+1
+.
+These configurations are part of the Thunder Terraform Provider Version 1.4.1 and are documented on pages 210, 211, and 224 of the provided PDF
+1
+. The Terraform provider leverages the ACOS-aXAPI to interact with A10 devices, allowing for the automation of configuration tasks related to service partitions and L3V.
+To utilize these configurations, you would define the appropriate resources in your Terraform configuration files and apply them using Terraform commands. This enables the management of A10 Thunder ADC resources in a declarative manner, consistent with infrastructure as code (IaC) practices.
