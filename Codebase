@@ -1,0 +1,162 @@
+1. config.yaml
+This YAML file serves as a configuration source for the Terraform project. It defines the structure and properties of the load balancer setup, including servers, service groups, and a virtual IP (VIP).
+
+Servers: Lists two real servers (real_server_1 and real_server_2) with their names, IP addresses, and the ports they listen on (80 and 443, both using TCP protocol).
+Service Groups: Defines two service groups (service_group_1 and service_group_2) with details like name, protocol, port number, load balancing method, health check, and member servers.
+VIP (Virtual IP): Specifies a virtual server (a10tflab_nordstrom_net_virtual_server_1) with its IP address and a list of ports. Each port entry includes details like port number, protocol, associated service group, persistence templates, and aflex scripts.
+2. main.tf
+This Terraform file uses the configuration defined in config.yaml to create the infrastructure on the A10 Load Balancer.
+
+Local Variable: It starts by decoding the config.yaml file into a local variable config.
+Module "servers": This module is used to create server configurations on the load balancer for each server defined in config.yaml.
+Module "servicegroup": This module sets up service groups as per the config.yaml file. It depends on the servers module, ensuring servers are configured before the service groups.
+Module "vip": This module configures the VIP with its properties and dependencies on the service groups.
+3. providers.tf
+This file defines the required providers for the Terraform project.
+
+Thunder Provider: It specifies the use of the a10networks/thunder provider, which is designed to interact with A10 Networks devices. The version is locked to a specific range (~> 1.2.1) for consistency.
+4. variables.tf
+This file declares variables used in the Terraform project.
+
+Commented Variables: There are commented-out variables (nonprod_lb_hostname, nonprod_lb_username, nonprod_lb_password) which suggest that the project might have been initially set up to take these as inputs, possibly for connecting to a non-production load balancer.
+Partition Variable: The partition variable is defined with a default value of "shared". This could be used to specify a partition on the A10 device where configurations are to be applied.
+Summary of the Project's Goal
+The project aims to automate the setup and configuration of an A10 Load Balancer using Terraform. It defines the necessary infrastructure components (servers, service groups, and VIP) in a YAML file, which Terraform then uses to configure the load balancer. This approach allows for infrastructure as code (IaC), making the setup process more efficient, repeatable, and less prone to human error. The use of modules in Terraform promotes reusability and organization of code.
+
+
+providers.tf
+This file defines the required Terraform providers.
+
+hcl
+Copy code
+terraform {
+  required_providers {
+    a10 = {
+      source  = "a10networks/thunder"
+      version = "~> 1.4.1"
+    }
+  }
+}
+
+provider "a10" {
+  # Add authentication details here
+  # username = var.a10_username
+  # password = var.a10_password
+  # api_url  = var.a10_api_url
+}
+variables.tf
+This file declares the variables used in your Terraform configuration.
+
+hcl
+Copy code
+variable "a10_username" {
+  description = "Username for A10 API authentication"
+  type        = string
+}
+
+variable "a10_password" {
+  description = "Password for A10 API authentication"
+  type        = string
+}
+
+variable "a10_api_url" {
+  description = "API URL for the A10 device"
+  type        = string
+}
+
+variable "config_path" {
+  description = "Path to the config.yaml file"
+  type        = string
+  default     = "./config.yaml"
+}
+config.yaml
+This YAML file contains the configuration for your load balancer, servers, service groups, and VIPs. It's structured to facilitate Blue/Green swaps by defining environments as part of service groups.
+
+yaml
+Copy code
+load_balancer:
+  ip_address: "10.228.34.212"
+  partition: "a10tflab"
+
+servers:
+  real_server_1:
+    name: "0990t05103hc01"
+    host: "10.230.72.133"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+  real_server_2:
+    name: "0990t05103hc02"
+    host: "10.230.72.139"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+
+servicegroup:
+  service_group_1:
+    name: "a10tflab_nordstrom_net_service_group1"
+    protocol: "TCP"
+    port_number: 80
+    lb_method: null
+    health_check: test-health-monitor
+    member_list:
+      - "0990t05103hc01"
+      - "0990t05103hc02"
+  service_group_2:
+    name: "a10tflab_nordstrom_net_service_group2"
+    protocol: "TCP"
+    port_number: 443
+    lb_method: "round-robin"
+    health_check: null
+    member_list:
+      - "0990t05103hc01"
+      - "0990t05103hc02"
+
+vip:
+  name: "a10tflab_nordstrom_net_virtual_server_1"
+  ip_address: "10.230.72.159"
+  port_list:
+    - port_number: 80
+      protocol: "http"
+      service_group: "a10tflab_nordstrom_net_service_group1"
+      template_persist_source_ip: "tflab-persistence-template"
+      template_persist_cookie: null
+      aflex_scripts:
+        - "terraform_aflex_script"
+    - port_number: 8080
+      protocol: "http"
+      service_group: "a10tflab_nordstrom_net_service_group2"
+      template_persist_source_ip: null
+      template_persist_cookie: "tflab-cookie-template"
+      aflex_scripts:
+        - "terraform_aflex_script"
+main.tf
+This file orchestrates the creation and management of resources based on the config.yaml file. Given the complexity of dynamically managing Blue/Green deployments directly through Terraform without custom provider support for dynamic service group switching, consider using Terraform to manage static configurations and a CI/CD pipeline to handle dynamic aspects like Blue/Green swaps.
+
+For the purpose of this example, let's focus on how you might structure main.tf to load configurations and prepare for static resource management:
+
+hcl
+Copy code
+locals {
+  config = yamldecode(file(var.config_path))
+}
+
+resource "a10_virtual_server" "vip" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+  # Additional configuration based on local.config.vip.port_list
+  # This example assumes static configuration; dynamic switching requires external orchestration
+}
+
+# Placeholder for server and service group management
+# Dynamic management of these resources for Blue/Green deployments
+# would likely involve external orchestration via CI/CD pipeline scripts
+Implementing Blue/Green Swap and Server Management
+Given Terraform's declarative nature and the static configuration of resources, achieving dynamic Blue/Green swaps and server management within service groups as described requires external orchestration. This might involve:
+
+CI/CD Pipeline: Use your CI/CD pipeline to modify the config.yaml file and trigger Terraform runs. The pipeline can implement logic to switch between Blue and Green configurations based on deployment phases or rollback needs.
+Custom Scripts: For operations not supported directly by Terraform (e.g., dynamically enabling/disabling servers in a service group), custom scripts invoked by the CI/CD pipeline or Terraform's external data source can perform API calls to the A10 device.
