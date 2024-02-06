@@ -161,3 +161,5 @@ Given Terraform's declarative nature and the static configuration of resources, 
 
 CI/CD Pipeline: Use your CI/CD pipeline to modify the config.yaml file and trigger Terraform runs. The pipeline can implement logic to switch between Blue and Green configurations based on deployment phases or rollback needs.
 Custom Scripts: For operations not supported directly by Terraform (e.g., dynamically enabling/disabling servers in a service group), custom scripts invoked by the CI/CD pipeline or Terraform's external data source can perform API calls to the A10 device.
+
+This setup ensures that your infrastructure as code approach with Terraform is complemented by dynamic orchestration capabilities, aligning with your operational objectives for Blue/Green deployments within the A10 Load Balancer environment.
