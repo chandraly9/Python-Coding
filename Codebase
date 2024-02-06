@@ -23,6 +23,7 @@ Partition Variable: The partition variable is defined with a default value of "s
 Summary of the Project's Goal
 The project aims to automate the setup and configuration of an A10 Load Balancer using Terraform. It defines the necessary infrastructure components (servers, service groups, and VIP) in a YAML file, which Terraform then uses to configure the load balancer. This approach allows for infrastructure as code (IaC), making the setup process more efficient, repeatable, and less prone to human error. The use of modules in Terraform promotes reusability and organization of code.
 
+This setup aims to automate the switching between "blue" and "green" environments for services under a Virtual IP (VIP), including service group modifications and server management within service groups.
 
 providers.tf
 This file defines the required Terraform providers.
