@@ -1,1 +1,498 @@
-xxx
+1. config.yaml
+This YAML file serves as a configuration source for the Terraform project. It defines the structure and properties of the load balancer setup, including servers, service groups, and a virtual IP (VIP).
+
+Servers: Lists two real servers (real_server_1 and real_server_2) with their names, IP addresses, and the ports they listen on (80 and 443, both using TCP protocol).
+Service Groups: Defines two service groups (service_group_1 and service_group_2) with details like name, protocol, port number, load balancing method, health check, and member servers.
+VIP (Virtual IP): Specifies a virtual server (a10tflab_nordstrom_net_virtual_server_1) with its IP address and a list of ports. Each port entry includes details like port number, protocol, associated service group, persistence templates, and aflex scripts.
+2. main.tf
+This Terraform file uses the configuration defined in config.yaml to create the infrastructure on the A10 Load Balancer.
+
+Local Variable: It starts by decoding the config.yaml file into a local variable config.
+Module "servers": This module is used to create server configurations on the load balancer for each server defined in config.yaml.
+Module "servicegroup": This module sets up service groups as per the config.yaml file. It depends on the servers module, ensuring servers are configured before the service groups.
+Module "vip": This module configures the VIP with its properties and dependencies on the service groups.
+3. providers.tf
+This file defines the required providers for the Terraform project.
+
+Thunder Provider: It specifies the use of the a10networks/thunder provider, which is designed to interact with A10 Networks devices. The version is locked to a specific range (~> 1.2.1) for consistency.
+4. variables.tf
+This file declares variables used in the Terraform project.
+
+Commented Variables: There are commented-out variables (nonprod_lb_hostname, nonprod_lb_username, nonprod_lb_password) which suggest that the project might have been initially set up to take these as inputs, possibly for connecting to a non-production load balancer.
+Partition Variable: The partition variable is defined with a default value of "shared". This could be used to specify a partition on the A10 device where configurations are to be applied.
+Summary of the Project's Goal
+The project aims to automate the setup and configuration of an A10 Load Balancer using Terraform. It defines the necessary infrastructure components (servers, service groups, and VIP) in a YAML file, which Terraform then uses to configure the load balancer. This approach allows for infrastructure as code (IaC), making the setup process more efficient, repeatable, and less prone to human error. The use of modules in Terraform promotes reusability and organization of code.
+
+This setup aims to automate the switching between "blue" and "green" environments for services under a Virtual IP (VIP), including service group modifications and server management within service groups.
+
+*********
+providers.tf
+This file defines the required Terraform providers.
+
+hcl
+Copy code
+terraform {
+  required_providers {
+    a10 = {
+      source  = "a10networks/thunder"
+      version = "~> 1.4.1"
+    }
+  }
+}
+
+provider "a10" {
+  # Add authentication details here
+  # username = var.a10_username
+  # password = var.a10_password
+  # api_url  = var.a10_api_url
+}
+
+*********
+variables.tf
+This file declares the variables used in your Terraform configuration.
+
+hcl
+Copy code
+variable "a10_username" {
+  description = "Username for A10 API authentication"
+  type        = string
+}
+
+variable "a10_password" {
+  description = "Password for A10 API authentication"
+  type        = string
+}
+
+variable "a10_api_url" {
+  description = "API URL for the A10 device"
+  type        = string
+}
+
+variable "config_path" {
+  description = "Path to the config.yaml file"
+  type        = string
+  default     = "./config.yaml"
+}
+
+*********
+
+config.yaml
+This YAML file contains the configuration for your load balancer, servers, service groups, and VIPs. It's structured to facilitate Blue/Green swaps by defining environments as part of service groups.
+
+yaml
+Copy code
+load_balancer:
+  ip_address: "10.228.34.212"
+  partition: "a10tflab"
+
+servers:
+  real_server_1:
+    name: "0990t05103hc01"
+    host: "10.230.72.133"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+  real_server_2:
+    name: "0990t05103hc02"
+    host: "10.230.72.139"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+
+servicegroup:
+  service_group_1:
+    name: "a10tflab_nordstrom_net_service_group1"
+    protocol: "TCP"
+    port_number: 80
+    lb_method: null
+    health_check: test-health-monitor
+    member_list:
+      - "0990t05103hc01"
+      - "0990t05103hc02"
+  service_group_2:
+    name: "a10tflab_nordstrom_net_service_group2"
+    protocol: "TCP"
+    port_number: 443
+    lb_method: "round-robin"
+    health_check: null
+    member_list:
+      - "0990t05103hc01"
+      - "0990t05103hc02"
+
+vip:
+  name: "a10tflab_nordstrom_net_virtual_server_1"
+  ip_address: "10.230.72.159"
+  port_list:
+    - port_number: 80
+      protocol: "http"
+      service_group: "a10tflab_nordstrom_net_service_group1"
+      template_persist_source_ip: "tflab-persistence-template"
+      template_persist_cookie: null
+      aflex_scripts:
+        - "terraform_aflex_script"
+    - port_number: 8080
+      protocol: "http"
+      service_group: "a10tflab_nordstrom_net_service_group2"
+      template_persist_source_ip: null
+      template_persist_cookie: "tflab-cookie-template"
+      aflex_scripts:
+        - "terraform_aflex_script"
+*********
+
+main.tf
+This file orchestrates the creation and management of resources based on the config.yaml file. Given the complexity of dynamically managing Blue/Green deployments directly through Terraform without custom provider support for dynamic service group switching, consider using Terraform to manage static configurations and a CI/CD pipeline to handle dynamic aspects like Blue/Green swaps.
+
+For the purpose of this example, let's focus on how you might structure main.tf to load configurations and prepare for static resource management:
+
+hcl
+Copy code
+locals {
+  config = yamldecode(file(var.config_path))
+}
+
+resource "a10_virtual_server" "vip" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+  # Additional configuration based on local.config.vip.port_list
+  # This example assumes static configuration; dynamic switching requires external orchestration
+}
+
+# Placeholder for server and service group management
+# Dynamic management of these resources for Blue/Green deployments
+# would likely involve external orchestration via CI/CD pipeline scripts
+
+***********
+
+Implementing Blue/Green Swap and Server Management
+Given Terraform's declarative nature and the static configuration of resources, achieving dynamic Blue/Green swaps and server management within service groups as described requires external orchestration. This might involve:
+
+CI/CD Pipeline: Use your CI/CD pipeline to modify the config.yaml file and trigger Terraform runs. The pipeline can implement logic to switch between Blue and Green configurations based on deployment phases or rollback needs.
+Custom Scripts: For operations not supported directly by Terraform (e.g., dynamically enabling/disabling servers in a service group), custom scripts invoked by the CI/CD pipeline or Terraform's external data source can perform API calls to the A10 device.
+
+**************
+
+To fully address your requirements for automating Blue/Green swaps within A10 Load Balancer environments using Terraform, including service group modifications and server management, let's expand and complete the main.tf file. This example will assume a more dynamic approach to managing configurations based on your config.yaml, focusing on the orchestration of service groups and VIPs for Blue/Green deployment scenarios.
+
+Given the limitations of Terraform in dynamically selecting configurations based on external conditions without manual intervention or external tooling, remember that some aspects of the Blue/Green swap, particularly those involving conditional logic at runtime, might still need to be managed through your CI/CD pipeline or custom scripting.
+
+Updated main.tf
+This updated main.tf includes placeholders for dynamic resource management, assuming your modules or resources can interpret the configurations as intended. The example aims to provide a conceptual framework, given the specifics of module functionality and A10 API interactions would require custom implementation.
+
+hcl
+Copy code
+locals {
+  config = yamldecode(file(var.config_path))
+}
+
+# Dynamically create servers based on the config.yaml
+resource "a10_server" "server" {
+  for_each = { for s in local.config.servers : s.name => s }
+
+  name      = each.value.name
+  host      = each.value.host
+  port_list = each.value.port_list
+  partition = local.config.load_balancer.partition
+}
+
+# Dynamically create service groups and associate servers
+resource "a10_service_group" "service_group" {
+  for_each = { for sg in local.config.servicegroup : sg.name => sg }
+
+  name        = each.value.name
+  protocol    = each.value.protocol
+  port_number = each.value.port_number
+  lb_method   = each.value.lb_method
+  health_check = each.value.health_check
+  partition   = local.config.load_balancer.partition
+
+  dynamic "member" {
+    for_each = each.value.member_list
+    content {
+      name = member.value
+      # Assuming `member` structure includes server name and port, adjust as necessary
+      server = a10_server.server[member.value].name
+      port   = lookup(a10_server.server[member.value].port_list[0], "port_number", 80)
+    }
+  }
+}
+
+# VIP configuration, assuming static setup; dynamic Blue/Green swap might require CI/CD orchestration
+resource "a10_virtual_server" "vip" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+  partition  = local.config.load_balancer.partition
+
+  dynamic "port" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port.value.port_number
+      protocol    = port.value.protocol
+      service_group = port.value.service_group
+      # Additional port-specific configurations
+    }
+  }
+}
+Notes:
+Dynamic Resource Creation: The use of for_each with dynamic blocks allows for the creation of servers and service groups based on the entries in config.yaml. This approach provides flexibility in managing multiple servers and service groups.
+Service Group Members: The dynamic block within a10_service_group resource is a conceptual approach to adding members to the service group. You'll need to adjust the logic to match the actual data structure and capabilities of your Terraform provider or modules.
+VIP Configuration: The VIP configuration here is relatively static. For a true Blue/Green deployment, you might need to adjust which service group a VIP points to based on your deployment phase. This could be managed through external orchestration, such as updating config.yaml and reapplying Terraform configurations via your CI/CD pipeline.
+CI/CD Pipeline Integration: For aspects of the Blue/Green process that cannot be directly managed by Terraform (e.g., conditional logic at runtime), integrate with your CI/CD pipeline to modify config.yaml and trigger Terraform runs as needed.
+This setup provides a foundation for managing A10 Load Balancer configurations with Terraform, aiming for a balance between infrastructure as code principles and the dynamic requirements of Blue/Green deployments.
+
+
+************
+The provided Terraform configuration in the updated main.tf is designed with the intention to manage resources within service partitions of A10 Load Balancers, specifically focusing on the automation of service groups, servers, and VIPs within a specified partition as outlined in your config.yaml. Here's how it addresses resources under service partitions:
+
+Partition Specification: Each resource definition includes a partition attribute, which is set to local.config.load_balancer.partition. This explicitly directs Terraform to manage the resources within the specified service partition, aligning with your requirement to automate resources within service partitions.
+
+Dynamic Resource Management: By dynamically creating servers (a10_server), service groups (a10_service_group), and VIPs (a10_virtual_server) based on the configurations defined in config.yaml, the Terraform script is tailored to manage these resources within the context of the specified partition. This dynamic approach ensures that the resources are associated with the correct partition, facilitating the management of resources under service partitions.
+
+Service Group and Server Management: The script includes logic to dynamically associate servers with service groups within the specified partition. This is crucial for managing servers within service groups (adding, removing, disabling, enabling) as part of the Blue/Green swap process.
+
+VIP Configuration: The VIP configuration is also tied to the specified partition, with the ability to dynamically configure port settings based on config.yaml. This setup supports the automation of VIP management within the service partition, crucial for directing traffic to the appropriate service group during Blue/Green swaps.
+
+Addressing Blue/Green Swaps
+For the Blue/Green swap process, while the Terraform configuration sets up the necessary infrastructure within the specified partition, the dynamic switching between "blue" and "green" environments for services under a VIP (as part of the Blue/Green swap process) would typically require additional steps outside of Terraform's static configuration capabilities. This includes:
+
+CI/CD Pipeline Integration: Utilizing a CI/CD pipeline to modify the config.yaml file to switch the active service group connected to the VIP from "blue" to "green" (or vice versa) and then triggering a Terraform run to apply these changes.
+External Orchestration: For aspects like dynamically enabling/disabling servers within a service group based on real-time conditions or rollback mechanisms, external scripts or tools, potentially invoked by Terraform's external data source or directly from the CI/CD pipeline, might be necessary.
+Conclusion
+The Terraform configuration provided is structured to manage resources within service partitions of A10 Load Balancers, aligning with your automation objectives. However, the dynamic aspects of the Blue/Green swap process, particularly those requiring real-time decision-making or updates based on deployment phases, would benefit from integration with CI/CD pipelines or external orchestration tools to fully automate the process within the constraints of Terraform's declarative nature and static configuration approach.
+
+
+
+The provided main.tf example is designed to manage resources within a specified service partition on A10 Load Balancers, focusing on service groups, servers, and VIP configurations based on the details from a config.yaml file. However, it does not inherently include dynamic Blue/Green swap logic or direct integration with CI/CD pipelines for real-time decision-making or updates based on deployment phases. Here's a breakdown of its capabilities and limitations regarding your requirements:
+
+Included in main.tf:
+Partition Management: Each resource (servers, service groups, VIPs) is associated with a specified partition (local.config.load_balancer.partition), ensuring that resources are managed within the correct service partition.
+
+Dynamic Resource Creation: The script dynamically creates servers and service groups based on the config.yaml file, allowing for the automated setup of these resources within the A10 Load Balancer environment.
+
+VIP Configuration: VIPs are configured with details specified in config.yaml, including their association with service groups, which is essential for directing traffic appropriately.
+
+Not Included in main.tf:
+Dynamic Blue/Green Swap Logic: The script does not include logic for dynamically switching between Blue and Green environments based on external triggers or conditions. Such functionality typically requires external orchestration or manual intervention to update the config.yaml and reapply the Terraform configuration.
+
+CI/CD Pipeline Integration: Direct integration with CI/CD pipelines for automated Blue/Green swaps is not explicitly defined in the main.tf. Integration with CI/CD pipelines would involve external processes that trigger Terraform runs based on specific conditions, such as successful testing of the Green environment.
+
+Real-Time Server Management within Service Groups: While the script allows for the configuration of servers within service groups, real-time enabling/disabling or adding/removing servers based on live traffic conditions or deployment phases would require additional mechanisms, potentially involving external scripts or tools that can be invoked by Terraform or directly from the CI/CD pipeline.
+
+Addressing the Gaps:
+To fully meet your Blue/Green deployment objectives, including dynamic environment swaps and real-time server management within service groups, consider the following approaches:
+
+External Orchestration: Utilize external scripts or tools that can be called from your CI/CD pipeline to modify the config.yaml for environment swaps or to manage servers within service groups dynamically. Terraform can then be triggered to apply these changes.
+
+Terraform External Data Source: For operations not directly supported by Terraform or the A10 provider, use Terraform's external data source to invoke custom scripts that perform API calls to the A10 Load Balancer for dynamic configuration changes.
+
+The main.tf provides a solid foundation for managing A10 Load Balancer configurations within service partitions. Still, achieving the full automation of Blue/Green deployments as described will require integrating Terraform with additional external orchestration or automation tools.
+
+************
+
+This setup ensures that your infrastructure as code approach with Terraform is complemented by dynamic orchestration capabilities, aligning with your operational objectives for Blue/Green deployments within the A10 Load Balancer environment.
+
+********
+
+To run the Terraform codebase for managing A10 Load Balancer configurations, including service groups, servers, and VIPs within service partitions, you'll follow a series of steps that involve setting up Terraform, organizing your files, initializing Terraform, and then applying your configuration. Here’s a step-by-step guide:
+
+1. Organize Your Files
+First, ensure you have the following files organized in your project directory:
+
+providers.tf: Contains Terraform provider configuration.
+variables.tf: Contains variable declarations.
+main.tf: Contains the main Terraform configuration for managing resources.
+config.yaml: Contains the configuration data for your A10 Load Balancer resources.
+2. Install Terraform
+If you haven't already, download and install Terraform from the official Terraform website. Ensure it's correctly installed by running terraform -v in your terminal or command prompt, which should display the Terraform version.
+
+3. Configure Authentication
+Before running Terraform, ensure your providers.tf file includes the necessary authentication details to connect to your A10 device. This might involve setting up environment variables or directly inserting credentials into the providers.tf file (though environment variables are recommended for security reasons).
+
+For example, if using environment variables for an A10 provider, you might set them in your shell:
+
+sh
+Copy code
+export A10_USERNAME="your_username"
+export A10_PASSWORD="your_password"
+export A10_API_URL="https://your-a10-device-api-endpoint"
+4. Initialize Terraform
+Open a terminal or command prompt, navigate to your project directory where your Terraform files are located, and run the following command:
+
+sh
+Copy code
+terraform init
+This command initializes Terraform, downloads the required provider(s), and prepares your project for deployment.
+
+5. Review the Plan
+Before applying your configuration, it's a good practice to review what changes Terraform will make. Run:
+
+sh
+Copy code
+terraform plan
+This command shows a preview of the actions Terraform will perform based on your configuration files. Review the output to ensure it aligns with your expectations.
+
+6. Apply the Configuration
+To apply your configuration and manage resources on your A10 Load Balancer, run:
+
+sh
+Copy code
+terraform apply
+Terraform will prompt you to confirm the actions before proceeding. Review the plan, and if everything looks correct, type yes to proceed.
+
+7. Monitor the Output
+Terraform will display the progress of applying your configuration. Once complete, it will output any defined outputs from your Terraform configuration, indicating the completion of the process.
+
+Running from CI/CD Pipelines
+If integrating with a CI/CD pipeline (e.g., Jenkins, GitLab CI/CD, GitHub Actions), you would automate the steps above as part of your pipeline configuration. The pipeline would typically check out your Terraform code from a repository, set up environment variables for authentication, and then run terraform init, terraform plan, and terraform apply commands as part of the deployment process.
+
+Note
+Ensure you have access to the A10 device from the location you're running Terraform and that your config.yaml file and Terraform configurations are correctly set up to reflect your desired state on the A10 Load Balancer. Always test in a non-production environment first to validate your configurations.
+
+
+********
+Integrating Terraform with a CI/CD pipeline for automating deployments, including A10 Load Balancer configurations, is a powerful way to streamline your infrastructure management and deployment processes. Here's a general guide on how to set up such an integration with common CI/CD tools like Jenkins, GitLab CI/CD, and GitHub Actions.
+
+General Steps for CI/CD Integration with Terraform:
+Source Control Setup: Ensure your Terraform configurations (main.tf, variables.tf, providers.tf, and any other related files) are stored in a version control system (VCS) supported by your CI/CD tool.
+
+CI/CD Pipeline Configuration: Configure your CI/CD pipeline to automate the execution of Terraform commands. This typically involves creating a pipeline configuration file in your repository (e.g., .gitlab-ci.yml for GitLab CI/CD, Jenkinsfile for Jenkins, or .github/workflows/main.yml for GitHub Actions).
+
+Environment Variables: Securely configure necessary environment variables in your CI/CD platform for A10 authentication (e.g., A10_USERNAME, A10_PASSWORD, A10_API_URL). Most CI/CD tools allow you to set these in the project or pipeline settings to avoid hardcoding sensitive information in your configuration files.
+
+Example Configurations:
+GitLab CI/CD:
+Create a .gitlab-ci.yml in your repository with the following content:
+
+yaml
+Copy code
+stages:
+  - validate
+  - deploy
+
+validate:
+  stage: validate
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform validate
+    - terraform plan
+
+deploy:
+  stage: deploy
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform apply -auto-approve
+  only:
+    - main
+GitHub Actions:
+Create a workflow file in .github/workflows/terraform.yml with the following content:
+
+yaml
+Copy code
+name: 'Terraform'
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: latest
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        env:
+          A10_USERNAME: ${{ secrets.A10_USERNAME }}
+          A10_PASSWORD: ${{ secrets.A10_PASSWORD }}
+          A10_API_URL: ${{ secrets.A10_API_URL }}
+Jenkins:
+For Jenkins, you'll use a Jenkinsfile. Here's a basic pipeline example:
+
+groovy
+Copy code
+pipeline {
+    agent any
+    environment {
+        A10_USERNAME = credentials('a10-username')
+        A10_PASSWORD = credentials('a10-password')
+        A10_API_URL = 'https://your-a10-device-api-endpoint'
+    }
+    stages {
+        stage('Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+        stage('Plan') {
+            steps {
+                sh 'terraform plan'
+            }
+        }
+        stage('Apply') {
+            steps {
+                sh 'terraform apply -auto-approve'
+            }
+        }
+    }
+}
+Final Steps and Considerations:
+Review and Test: Before fully integrating and running your pipeline, review the configurations and test in a controlled environment to ensure everything works as expected.
+Security: Ensure that your CI/CD pipeline is secure, especially when handling sensitive information like credentials.
+Pipeline Triggers: Configure triggers for your pipeline (e.g., on push to a specific branch, on merge requests) based on your workflow requirements.
+Integrating Terraform with your CI/CD pipeline for A10 Load Balancer configuration management not only automates the deployment process but also ensures consistency and reliability in your infrastructure provisioning and updates.
+
+*********
+Testing your Terraform codebase, especially when integrated with CI/CD for managing A10 Load Balancer configurations, involves a few key steps and considerations. Here's how you can approach testing:
+
+1. Local Development Environment
+Before pushing your code to the version control system (VCS) and triggering the CI/CD pipeline, it's a good practice to test your Terraform code locally. This allows you to catch syntax errors, configuration issues, or logical errors early in the development process.
+
+Setup: Ensure you have Terraform installed on your local machine along with any necessary access to the A10 Load Balancer API (credentials, API endpoint, etc.).
+Run Terraform Commands: Use terraform init, terraform plan, and terraform apply locally to test the creation, modification, and destruction of resources as defined in your Terraform configuration.
+Validate: Check the A10 Load Balancer's administrative interface or use its API to verify that the resources were created or modified as expected.
+2. Version Control System (VCS)
+Once you've validated your Terraform code locally, commit and push your changes to your VCS repository (e.g., GitHub, GitLab, Bitbucket). This is where your CI/CD pipeline will pick up changes for further testing and deployment.
+
+3. CI/CD Pipeline
+Your CI/CD pipeline can be configured to run various stages of testing, including:
+
+Static Code Analysis: Use tools like terraform fmt and terraform validate to ensure your code is properly formatted and syntactically correct.
+Plan Stage: Run terraform plan within your pipeline to preview changes without applying them. This can be particularly useful for merge requests or pull requests to review changes before merging into your main branch.
+Apply Stage: For environments where it's safe to do so (like development or staging environments), you can configure your pipeline to automatically run terraform apply to deploy changes. Ensure you have approval processes or manual triggers for production environments to prevent unintended changes.
+4. Testing Environments
+Development or Staging Environment: Always test your changes in a non-production environment first. This should be as similar to your production environment as possible to catch any issues before they affect production.
+Production Environment: After thorough testing in development or staging environments, and once changes are reviewed and approved, you can apply changes to your production environment. This should be done cautiously, preferably during low-traffic periods, and with a rollback plan in place.
+5. Monitoring and Validation
+After applying changes through your CI/CD pipeline, monitor the application and infrastructure state closely. Use the A10 Load Balancer's monitoring tools, logs, and Terraform's state management features to ensure everything is operating as expected.
+
+Where to Test:
+Locally: For initial development and quick iterations.
+CI/CD Pipeline: For automated testing, validation, and deployment across different environments (development, staging, production).
+Best Practices:
+Version Control: Keep your Terraform configurations in version control for collaboration, history tracking, and rollback capabilities.
+Modular Design: Structure your Terraform code in modules for reusability and maintainability.
+Secrets Management: Use secret management tools or CI/CD pipeline features to securely handle credentials and sensitive information.
+Documentation: Document your setup, configurations, and procedures for testing and deployment.
+By following these steps and considerations, you can effectively test and deploy your Terraform configurations for A10 Load Balancer management through CI/CD pipelines, ensuring a reliable and automated infrastructure provisioning process.
+*********
