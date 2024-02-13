@@ -826,3 +826,116 @@ resource "thunder_slb_virtual_server" "vip" {
 }
 
 ]]]]
+
+Lets compare all 3
+
+locals {
+  config = yamldecode(file("${var.config_path}"))
+}
+
+# Dynamically create servers based on the config.yaml
+resource "thunder_slb_server" "server" {
+  for_each = { for s in local.config.servers : s.name => s }
+
+  name = each.value.name
+  host = each.value.host
+
+  dynamic "port_list" {
+    for_each = each.value.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+    }
+  }
+}
+
+# Dynamically create service groups and associate servers
+resource "thunder_slb_service_group" "service_group" {
+  for_each = { for sg in local.config.servicegroup : sg.name => sg }
+
+  name     = each.value.name
+  protocol = each.value.protocol
+
+  # Correctly associate servers with the service group
+  # This section needs to be adjusted according to the provider's documentation
+}
+
+# VIP configuration with corrected syntax
+resource "thunder_slb_virtual_server" "vip" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+
+      # Assuming aflex_scripts needs to be defined as a list of aflex script names
+      # This section needs to be adjusted according to the provider's documentation
+    }
+  }
+}
+
+
+____
+
+sh-3.2# cat main.tf.servicegroupsNserversNportsRsuccessful.bk 
+locals {
+  config = yamldecode(file(var.config_path))
+}
+
+# Dynamically create servers based on the config.yaml
+resource "thunder_slb_server" "server" {
+  for_each = {for s in local.config.servers : s.name => s}
+
+  name = each.value.name
+  host = each.value.host
+
+  dynamic "port_list" {
+    for_each = each.value.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+    }
+  }
+}
+
+# Dynamically create service groups and associate servers
+resource "thunder_slb_service_group" "service_group" {
+  for_each = {for sg in local.config.servicegroup : sg.name => sg}
+
+  name     = each.value.name
+  protocol = each.value.protocol
+
+  dynamic "member_list" {
+    for_each = each.value.member_list
+    content {
+      # Ensure the server name matches a key in the thunder_slb_server.server map
+      name = thunder_slb_server.server[member_list.value].name
+      # Correctly reference the port number for the server
+      port = thunder_slb_server.server[member_list.value].port_list[0].port_number
+    }
+  }
+}
+
+
+# VIP configuration, assuming static setup; dynamic Blue/Green swap might require CI/CD orchestration
+resource "thunder_slb_virtual_server" "vip" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+      template_persist_source_ip = port_list.value.template_persist_source_ip
+      template_persist_cookie = port_list.value.template_persist_cookie
+#      aflex_scripts = port_list.value.aflex_scripts
+    }
+  }
+}
+
