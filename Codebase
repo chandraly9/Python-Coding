@@ -938,4 +938,32 @@ resource "thunder_slb_virtual_server" "vip" {
     }
   }
 }
+((((
 
+# Virtual Server
+resource "thunder_slb_virtual_server" "virtual_server" {
+  name       = var.name
+  ip_address = var.ip_address
+  netmask    = var.netmask
+  dynamic "port_list" {
+    for_each = var.port_list
+    content {
+      port_number          = port_list.value.port_number
+      protocol             = port_list.value.protocol
+      service_group        = port_list.value.service_group
+      auto                 = 1
+      use_rcv_hop_for_resp = 1
+      dynamic "aflex_scripts" {
+        for_each = port_list.value.aflex_scripts
+        content {
+          #aflex = aflex_scripts.value
+          aflex = aflex_scripts.value
+        }
+      }
+      template_persist_source_ip = port_list.value.template_persist_source_ip
+      template_persist_cookie    = port_list.value.template_persist_cookie
+      template_server_ssl        = lookup(port_list.value, "template_server_ssl", null)
+    }
+  }
+}
+oooo
