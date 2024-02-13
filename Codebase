@@ -689,3 +689,14 @@ resource "thunder_slb_virtual_server" "vip" {
 }
 
 ____
+
+sh-3.2# terraform plan
+╷
+│ Error: Unsupported argument
+│ 
+│   on main.tf line 30, in resource "thunder_slb_service_group" "service_group":
+│   30:   member_list = [for member in each.value.member_list : {
+│ 
+│ An argument named "member_list" is not expected here. Did you mean to define a block of type "member_list"?
+
+---
