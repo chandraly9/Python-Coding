@@ -552,4 +552,72 @@ resource "thunder_slb_virtual_server" "vip" {
     }
   }
 }
+000000000000000000000
 
+locals {
+  config = yamldecode(file("${var.config_path}"))
+}
+
+# Dynamically create servers based on the config.yaml
+resource "thunder_slb_server" "server" {
+  for_each = { for s in local.config.servers : s.name => s }
+
+  name = each.value.name
+  host = each.value.host
+
+  dynamic "port_list" {
+    for_each = each.value.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+    }
+  }
+}
+
+# Dynamically create service groups and associate servers
+resource "thunder_slb_service_group" "service_group" {
+  for_each = { for sg in local.config.servicegroup : sg.name => sg }
+
+  name     = each.value.name
+  protocol = each.value.protocol
+
+  dynamic "member" {
+    for_each = each.value.member_list
+    content {
+      name = thunder_slb_server.server[member.value].name
+      port = lookup({ for p in local.config.servers[member.value].port_list : "${p.port_number}" => p }, "port_number", 80)
+    }
+  }
+}
+
+# VIP configuration, ensuring dynamic setup for Blue/Green swap or static setup
+resource "thunder_slb_virtual_server" "vip" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+
+      # Assuming aflex_scripts needs to be defined as a list of aflex script names
+      aflex_scripts = port_list.value.aflex_scripts
+
+      # If template_persist_source_ip and template_persist_cookie are optional, ensure they're only set when not null
+      template_persist_source_ip = try(port_list.value.template_persist_source_ip, null)
+      template_persist_cookie = try(port_list.value.template_persist_cookie, null)
+
+      # Additional attributes like template_connection_reuse, template_persist_cookie, template_http, template_tcp_proxy_client, and template_tcp_proxy_server
+      # should be included only if they are relevant and defined in your config.yaml or if they are necessary for your VIP configuration.
+      # Example:
+      # template_connection_reuse = "YourTemplateConnectionReuseName"
+      # template_persist_cookie = "YourTemplatePersistCookieName"
+      # template_http = "YourTemplateHttpName"
+      # template_tcp_proxy_client = "YourTemplateTcpProxyClientName"
+      # template_tcp_proxy_server = "YourTemplateTcpProxyServerName"
+    }
+  }
+}
+0000000000
