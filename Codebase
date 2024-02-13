@@ -621,3 +621,13 @@ resource "thunder_slb_virtual_server" "vip" {
   }
 }
 0000000000
+
+sh-3.2# terraform plan
+╷
+│ Error: Unsupported block type
+│ 
+│   on main.tf line 28, in resource "thunder_slb_service_group" "service_group":
+│   28:   dynamic "member" {
+│ 
+│ Blocks of type "member" are not expected here.
+000
