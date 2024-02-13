@@ -1267,6 +1267,47 @@ resource "thunder_slb_virtual_server" "vip" {
 
 000000
 
+
+====
+
+locals {
+  config = yamldecode(file("${var.config_path}"))
+}
+
+# Assuming the rest of your configuration for servers and service groups remains the same
+
+# Updated Virtual Server configuration
+resource "thunder_slb_virtual_server" "virtual_server" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+
+      # Assuming aflex_scripts needs to be defined within a block if supported
+      dynamic "aflex_scripts" {
+        for_each = port_list.value.aflex_scripts
+        content {
+          aflex = aflex_scripts.value
+        }
+      }
+
+      # Optional attributes like template_persist_source_ip and template_persist_cookie
+      # Ensure they're included based on your specific requirements and the documentation
+      template_persist_source_ip = try(port_list.value.template_persist_source_ip, null)
+      template_persist_cookie    = try(port_list.value.template_persist_cookie, null)
+
+      # Include additional attributes as necessary based on the 1.4.1 documentation
+    }
+  }
+}
+
+====
+
 load_balancer:
   ip_address: "10.228.34.212"
   partition: "a10tflab"
