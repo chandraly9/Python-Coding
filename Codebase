@@ -1395,3 +1395,12 @@ resource "thunder_slb_virtual_server" "virtual_server" {
 }
 
 ----
+
+sh-3.2# terraform plan
+╷
+│ Error: Unsupported argument
+│ 
+│   on main.tf line 60, in resource "thunder_slb_virtual_server" "virtual_server":
+│   60:      source_nat_auto = true
+│ 
+│ An argument named "source_nat_auto" is not expected here.
