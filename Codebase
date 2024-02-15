@@ -1404,3 +1404,137 @@ sh-3.2# terraform plan
 │   60:      source_nat_auto = true
 │ 
 │ An argument named "source_nat_auto" is not expected here.
+
+
+
+**********
+
+To ensure all resources are created within a specified partition and to facilitate the management of these resources through CI/CD pipelines while allowing end-users to interact with a subset of configurations, I'll provide a structured approach. This includes the main CI/CD Terraform configuration and a subset configuration for end-users. The CI/CD configuration will reference the subset configuration and enforce the use of specific provider and variable settings, ensuring administrative control over critical settings while allowing flexibility for end-user customizations.
+
+CI/CD Main Configuration
+main.tf (CI/CD Main File)
+hcl
+Copy code
+module "user_defined_resources" {
+  source = "./user_resources"  # Path to the user-defined resources module
+
+  # Pass the CI/CD controlled variables to the module
+  partition_name = var.partition_name
+  a10_api_url    = var.a10_api_url
+  a10_username   = var.a10_username
+  a10_password   = var.a10_password
+}
+
+# Example of creating a service partition (if the provider supports it)
+resource "thunder_partition" "example_partition" {
+  name = var.partition_name
+  # Additional attributes as required
+}
+providers.tf (CI/CD Providers File)
+hcl
+Copy code
+terraform {
+  required_providers {
+    thunder = {
+      source  = "a10networks/thunder"
+      version = "~> 1.4.1"
+    }
+  }
+}
+
+provider "thunder" {
+  address  = var.a10_api_url
+  username = var.a10_username
+  password = var.a10_password
+}
+variables.tf (CI/CD Variables File)
+hcl
+Copy code
+variable "a10_username" {
+  description = "Username for A10 API authentication"
+  type        = string
+}
+
+variable "a10_password" {
+  description = "Password for A10 API authentication"
+  type        = string
+}
+
+variable "a10_api_url" {
+  description = "API URL for the A10 device"
+  type        = string
+}
+
+variable "partition_name" {
+  description = "Name of the partition to create and use for all resources"
+  type        = string
+}
+User-Defined Resources Module
+This module (./user_resources) contains the subset of configurations that end-users can modify. It includes resources like servers, service groups, and VIPs, ensuring they are created within the partition specified by the CI/CD pipeline.
+
+main.tf (User Resources Module)
+hcl
+Copy code
+locals {
+  config = yamldecode(file("${var.config_path}"))
+}
+
+resource "thunder_slb_server" "server" {
+  for_each = {for s in local.config.servers : s.name => s}
+
+  name      = each.value.name
+  host      = each.value.host
+  partition = var.partition_name
+
+  dynamic "port_list" {
+    for_each = each.value.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+    }
+  }
+}
+
+resource "thunder_slb_service_group" "service_group" {
+  for_each = {for sg in local.config.servicegroup : sg.name => sg}
+
+  name      = each.value.name
+  protocol  = each.value.protocol
+  partition = var.partition_name
+
+  dynamic "member_list" {
+    for_each = each.value.member_list
+    content {
+      name = thunder_slb_server.server[member_list.value].name
+      port = thunder_slb_server.server[member_list.value].port_list[0].port_number
+    }
+  }
+}
+
+resource "thunder_slb_virtual_server" "virtual_server" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+  partition  = var.partition_name
+
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number   = port_list.value.port_number
+      protocol      = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+    }
+  }
+}
+variables.tf (User Resources Module)
+hcl
+Copy code
+variable "config_path" {
+  description = "Path to the config.yaml file for user-defined settings"
+  type        = string
+}
+
+variable "partition_name" {
+  description = "Partition name passed from the CI/CD pipeline"
+  type        = string
+}
+This structure allows CI/CD pipelines to maintain control over critical infrastructure settings while providing flexibility for end-users to define specific resource configurations. The CI/CD main configuration ensures that all resources are created within a specified partition and utilizes provider and variable settings that enforce administrative policies.
