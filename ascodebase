@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# File containing the new hostnames
+FILE="hosts.txt"
+OUTPUT="output.csv"
+ERROR_LOG="error.log"
+
+# Clear previous output and error log files
+> "$OUTPUT"
+> "$ERROR_LOG"
+
+echo "HOST,Status,Details" >> "$OUTPUT"
+
+while IFS=, read -r HOST NEW_HOSTNAME
+do
+    # Check if HOST or NEW_HOSTNAME is empty; if so, skip
+    if [ -z "$HOST" ] || [ -z "$NEW_HOSTNAME" ]; then
+        echo "$(date) - Skipping due to missing HOST or NEW_HOSTNAME" >> "$ERROR_LOG"
+        echo "$HOST,Failed,Missing HOST or NEW_HOSTNAME" >> "$OUTPUT"
+        continue
+    fi
+
+    # Attempt the hostname change
+    ssh -n rackware@$HOST "sudo hostnamectl set-hostname $NEW_HOSTNAME.ux.corp.local"
+    if [ $? -ne 0 ]; then
+        echo "$(date) - Failed to change hostname for $HOST" >> "$ERROR_LOG"
+        echo "$HOST,Failed,Hostname change error" >> "$OUTPUT"
+        continue
+    fi
+
+    # Attempt to update /etc/issue
+    ssh -n rackware@$HOST "sudo sed -i '\$s/.*/$NEW_HOSTNAME.ux.corp.local/' /etc/issue"
+    if [ $? -ne 0 ]; then
+        echo "$(date) - Failed to update /etc/issue for $HOST" >> "$ERROR_LOG"
+        echo "$HOST,Failed,/etc/issue update error" >> "$OUTPUT"
+        continue
+    fi
+
+    echo "Hostname changed for $HOST to $NEW_HOSTNAME.ux.corp.local and /etc/issue updated."
+    echo "$(date) - Hostname changed for $HOST to $NEW_HOSTNAME.ux.corp.local and /etc/issue updated." >> "$ERROR_LOG"
+    echo "$HOST,Success,$NEW_HOSTNAME.ux.corp.local" >> "$OUTPUT"
+
+done < "$FILE"
