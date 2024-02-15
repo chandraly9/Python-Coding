@@ -41,3 +41,18 @@ do
     echo "$HOST,Success,$NEW_HOSTNAME.ux.corp.local" >> "$OUTPUT"
 
 done < "$FILE"
+
+
+[Monday 4:17 PM] Pawan Singh
+Peo Prod compartment DNS
+search ux.corp.local ad.corp.local trinet.com oci.trinet.net
+
+options timeout:4
+
+options attempts:2
+
+nameserver      10.48.64.11
+
+nameserver      10.48.64.12
+[Monday 4:17 PM] Pawan Singh
+cat /etc/resolv.conf
