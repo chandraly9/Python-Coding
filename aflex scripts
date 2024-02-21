@@ -1,1 +1,27 @@
 
+provider "thunder" {
+  # Provider configuration here
+  # Include authentication details and target ADC IP address
+}
+
+resource "thunder_virtual_server" "vip" {
+  name       = "your_vip_name"
+  ip_address = "your_vip_ip_address"
+  
+  port_list {
+    port_number  = 80
+    protocol     = "http"
+    service_group = "your_service_group_name"
+    aflex_scripts = [<<EOF
+when HTTP_REQUEST {
+  if {[LB::status pool Server_HTTP] equals "down" } {
+    HTTP::respond 200 content "<html><head><title>Apology
+    Page</title></head><body>We are sorry for the inconvenience, but
+    the site is temporarily out of service<br>If you feel you have
+    reached this page in error, please try again.<p></body></html>"
+  }
+}
+EOF
+    ]
+  }
+}
