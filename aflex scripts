@@ -125,3 +125,13 @@ resource "thunder_file_aflex_local" "aflex_script" {
                         
 
 ----
+resource "thunder_virtual_server" "vip" {
+  name       = "your_vip_name"
+  ip_address = "your_vip_ip_address"
+  
+  // Other configuration for the VIP...
+  
+  aflex_script = thunder_file_aflex.aflex_script.dst_file
+}
+
+]]]]]]]]]
