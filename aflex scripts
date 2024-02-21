@@ -26,3 +26,15 @@ EOF
     ]
   }
 }
+
+
+*****
+
+sh-3.2# terraform plan
+╷
+│ Error: Unsupported block type
+│ 
+│   on main.tf line 55, in resource "thunder_slb_virtual_server" "virtual_server":
+│   55: resource "thunder_file_aflex_local" "aflex_script" {
+│ 
+│ Blocks of type "resource" are not expected here.
