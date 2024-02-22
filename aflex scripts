@@ -1,3 +1,16 @@
+
+when HTTP_REQUEST {
+  if {[LB::status pool Server_HTTP] equals "down" } {
+    HTTP::respond 200 content "<html><head><title>Apology
+    Page</title></head><body>We are sorry for the inconvenience, but
+    the site is temporarily out of service<br>If you feel you have
+    reached this page in error, please try again.<p></body></html>"
+  }
+}
+
+
+
+______________________________
 https://www.a10networks.com/blog/aflex-examples/
 
 provider "thunder" {
