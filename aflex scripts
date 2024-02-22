@@ -339,3 +339,14 @@ vip:
       aflex_scripts: ["Terraform_aflex_script"]
 
 ======
+
+sh-3.2# terraform plan
+╷
+│ Error: Unsupported argument
+│ 
+│   on main.tf line 54, in resource "thunder_slb_virtual_server" "virtual_server":
+│   54:      aflex_scripts = port_list.value.aflex_scripts
+│ 
+│ An argument named "aflex_scripts" is not expected here. Did you mean to define a block of type "aflex_scripts"?
+
+_________
