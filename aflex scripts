@@ -544,3 +544,209 @@ resource "thunder_virtual_server" "test_virtual" {
 }
 
 -------
+│ 
+╵
+sh-3.2# vi main.tf
+
+locals {
+  config = yamldecode(file("${var.config_path}"))
+}
+
+# Dynamically create servers based on the config.yaml
+resource "thunder_slb_server" "server" {
+  for_each = {for s in local.config.servers : s.name => s}
+
+  name = each.value.name
+  host = each.value.host
+
+  dynamic "port_list" {
+    for_each = each.value.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+    }
+  }
+}
+
+# Dynamically create service groups and associate servers
+resource "thunder_slb_service_group" "service_group" {
+  for_each = {for sg in local.config.servicegroup : sg.name => sg}
+
+  name     = each.value.name
+  protocol = each.value.protocol
+
+  dynamic "member_list" {
+    for_each = each.value.member_list
+    content {
+      # Ensure the server name matches a key in the thunder_slb_server.server map
+      name = thunder_slb_server.server[member_list.value].name
+      # Correctly reference the port number for the server
+      port = thunder_slb_server.server[member_list.value].port_list[0].port_number
+    }
+  }
+}
+
+# Virtual Server
+# VIP configuration with corrected syntax based on the documentation
+resource "thunder_slb_virtual_server" "virtual_server" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+     auto = 1
+
+aflex_scripts {
+              aflex = "my_aflex_scripts"
+          }
+}
+}
+}
+
+resource "thunder_file_aflex_local" "aflex_script" {
+  action      = "import"
+  dst_file    = "my_aflex_scripts"
+  file        = "my_aflex_scripts"
+  file_handle = "/opt/terraform/project_A10Terraform-v1/script.aflex"
+  skip_backup = 0
+}
+;;;;;
+
+sh-3.2# vi config.yaml 
+
+load_balancer:
+  ip_address: "10.228.34.212"
+  partition: "a10tflab"
+
+servers:
+  real_server_1:
+    name: "0990t05103hc01"
+    host: "10.230.72.133"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+  real_server_2:
+    name: "0990t05103hc02"
+    host: "10.230.72.139"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+
+servicegroup:
+  service_group_1:
+    name: "a10tflab_nordstrom_net_service_group1"
+    protocol: "tcp"
+    port_number: 80
+    lb_method: null
+    health_check: test-health-monitor
+    member_list:
+      - "0990t05103hc01"
+
+  service_group_2:
+    name: "a10tflab_nordstrom_net_service_group2"
+    protocol: "tcp"
+    port_number: 443
+    lb_method: "round-robin"
+    health_check: null
+    member_list:
+      - "0990t05103hc02"
+
+
+vip:
+  name: "10tflab_nordstrom_net_virtual_server_1"
+  ip_address: "10.230.72.159"
+  port_list:
+    - port_number: 80
+      protocol: "http"
+      service_group: "a10tflab_nordstrom_net_service_group1"
+      template_persist_source_ip: "tflab-persistence-template"
+      template_persist_cookie: "tflab-cookie-template"
+      aflex_scripts: ["my_aflex_scripts"]
+
+
+
+----
+
+  + shared_partition_diameter_template               = 0
+          + shared_partition_dns_template                    = 0
+          + shared_partition_doh_template                    = 0
+          + shared_partition_dynamic_service_template        = 0
+          + shared_partition_external_service_template       = 0
+          + shared_partition_fix_template                    = 0
+          + shared_partition_http_policy_template            = 0
+          + shared_partition_http_template                   = 0
+          + shared_partition_imap_pop3_template              = 0
+          + shared_partition_persist_cookie_template         = 0
+          + shared_partition_persist_destination_ip_template = 0
+          + shared_partition_persist_source_ip_template      = 0
+          + shared_partition_persist_ssl_sid_template        = 0
+          + shared_partition_policy_template                 = 0
+          + shared_partition_pool                            = 0
+          + shared_partition_quic_template                   = 0
+          + shared_partition_server_ssl_template             = 0
+          + shared_partition_smpp_template                   = 0
+          + shared_partition_smtp_template                   = 0
+          + shared_partition_tcp                             = 0
+          + shared_partition_tcp_proxy_template              = 0
+          + shared_partition_udp                             = 0
+          + shared_partition_virtual_port_template           = 0
+          + showtech_print_extended_stats                    = 0
+          + skip_rev_hash                                    = 0
+          + snat_on_vip                                      = 0
+          + stats_data_action                                = "stats-data-enable"
+          + substitute_source_mac                            = 0
+          + support_http2                                    = 0
+          + syn_cookie                                       = 0
+          + template_tcp                                     = "default"
+          + template_tcp_shared                              = "default"
+          + template_udp                                     = "default"
+          + template_udp_shared                              = "default"
+          + template_virtual_port                            = "default"
+          + use_alternate_port                               = 0
+          + use_cgnv6                                        = 0
+          + use_default_if_no_server                         = 0
+          + use_rcv_hop_for_resp                             = 0
+          + use_rcv_hop_group                                = 0
+          + uuid                                             = (known after apply)
+          + when_down                                        = 0
+          + when_down_protocol2                              = 0
+
+          + aflex_scripts {
+              + aflex = "my_aflex_scripts"
+            }
+        }
+    }
+
+Plan: 6 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+thunder_file_aflex_local.aflex_script: Creating...
+thunder_slb_server.server["0990t05103hc02"]: Creating...
+thunder_slb_server.server["0990t05103hc01"]: Creating...
+thunder_file_aflex_local.aflex_script: Creation complete after 0s [id=1]
+thunder_slb_server.server["0990t05103hc02"]: Creation complete after 0s [id=0990t05103hc02]
+thunder_slb_server.server["0990t05103hc01"]: Creation complete after 0s [id=0990t05103hc01]
+thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group2"]: Creating...
+thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group1"]: Creating...
+thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group2"]: Creation complete after 0s [id=a10tflab_nordstrom_net_service_group2]
+thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group1"]: Creation complete after 2s [id=a10tflab_nordstrom_net_service_group1]
+thunder_slb_virtual_server.virtual_server: Creating...
+╷
+│ Error: axapi failure::err=Line 2: the pool doesn't exist. [LB::status pool Server_HTTP]
+│ 
+│   with thunder_slb_virtual_server.virtual_server,
+│   on main.tf line 41, in resource "thunder_slb_virtual_server" "virtual_server":
+│   41: resource "thunder_slb_virtual_server" "virtual_server" {
