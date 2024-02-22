@@ -350,3 +350,74 @@ sh-3.2# terraform plan
 │ An argument named "aflex_scripts" is not expected here. Did you mean to define a block of type "aflex_scripts"?
 
 _________
+
+sh-3.2# vi main.tf
+
+locals {
+  config = yamldecode(file("${var.config_path}"))
+}
+
+# Dynamically create servers based on the config.yaml
+resource "thunder_slb_server" "server" {
+  for_each = {for s in local.config.servers : s.name => s}
+
+  name = each.value.name
+  host = each.value.host
+
+  dynamic "port_list" {
+    for_each = each.value.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+    }
+  }
+}
+
+# Dynamically create service groups and associate servers
+resource "thunder_slb_service_group" "service_group" {
+  for_each = {for sg in local.config.servicegroup : sg.name => sg}
+
+  name     = each.value.name
+  protocol = each.value.protocol
+
+  dynamic "member_list" {
+    for_each = each.value.member_list
+    content {
+      # Ensure the server name matches a key in the thunder_slb_server.server map
+      name = thunder_slb_server.server[member_list.value].name
+      # Correctly reference the port number for the server
+      port = thunder_slb_server.server[member_list.value].port_list[0].port_number
+    }
+  }
+}
+
+# Virtual Server
+# VIP configuration with corrected syntax based on the documentation
+resource "thunder_slb_virtual_server" "virtual_server" {
+  name       = local.config.vip.name
+  ip_address = local.config.vip.ip_address
+
+#source_nat_auto = true
+#enable_source_nat = true
+  dynamic "port_list" {
+    for_each = local.config.vip.port_list
+    content {
+      port_number = port_list.value.port_number
+      protocol    = port_list.value.protocol
+      service_group = thunder_slb_service_group.service_group[port_list.value.service_group].name
+     auto = 1
+     aflex_scripts = port_list.value.aflex_scripts
+#      template_persist_source_ip = try(port_list.value.template_persist_source_ip, null)
+#      template_persist_cookie = try(port_list.value.template_persist_cookie, null)
+}
+}
+}
+
+resource "thunder_file_aflex_local" "aflex_script" {
+  action      = "import"
+  dst_file    = "my_aflex_scripts"
+  file        = "my_aflex_scripts"
+  file_handle = "/opt/terraform/project_A10Terraform-v1/script.aflex"
+  skip_backup = 0
+}
+-----
