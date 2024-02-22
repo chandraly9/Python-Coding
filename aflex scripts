@@ -421,3 +421,9 @@ resource "thunder_file_aflex_local" "aflex_script" {
   skip_backup = 0
 }
 -----
+dynamic "aflex" {
+        for_each = port_list.value.aflex_scripts
+        content {
+          name = aflex.value
+        }
+      }
