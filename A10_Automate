@@ -1,0 +1,666 @@
+root main.tf =
+locals {
+  config = yamldecode(file("${path.module}/config.yaml"))
+}
+
+module "certs" {
+  source = "./modules/certs"
+  config = local.config
+}
+
+module "servers" {
+  source = "./modules/servers"
+  config = local.config
+}
+
+module "service_group" {
+  source       = "./modules/service_group"
+  config       = local.config
+  servers_info = module.servers.servers_info
+}
+
+module "vips" {
+  source              = "./modules/vips"
+  config              = local.config
+  service_groups_info = module.service_group.service_groups_info
+  ssl_template   = module.certs.ssl_template
+}
+
+****
+
+creds.sh
+export TF_VAR_a10_username=admin
+export TF_VAR_a10_password='crispybac0n!'
+export TF_VAR_a10_api_url='10.228.34.212'
+export TF_VAR_certificate_path="/Users/satish.loyapally/Nordstrom\ Development/project_A10Terraform-v2/certs/ssl/a10tflab_nordstrom_app.pem"
+export TF_VAR_private_key_path="/Users/satish.loyapally/Nordstrom\ Development/project_A10Terraform-v2/certs/ssl/a10tflab_nordstrom_app.pem"
+
+****
+
+terraform {
+  required_providers {
+    thunder = {
+      source  = "a10networks/thunder"
+      version = "~> 1.4.1"
+    }
+  }
+}
+
+provider "thunder" {
+  address  = var.a10_api_url
+  username = var.a10_username
+  password = var.a10_password
+}
+
+*****
+
+variable "a10_username" {
+  description = "Username for A10 API authentication"
+  type        = string
+}
+
+variable "a10_password" {
+  description = "Password for A10 API authentication"
+  type        = string
+}
+
+variable "a10_api_url" {
+  description = "API URL for the A10 device"
+  type        = string
+}
+
+variable "config_path" {
+  description = "Path to the config.yaml file"
+  type        = string
+  default     = "./config.yaml"
+}
+
+variable "certificate_path" {
+  description = "Path to SSL certificate file"
+  type        = string
+}
+
+variable "private_key_path" {
+  description = "Path to SSL private key file"
+  type        = string
+}
+
+
+#variable "partition_name" {
+#  description = "Name of the partition to create and use for all resources"
+#  type        = string
+#}
+
+*****
+
+/*resource "thunder_file_ssl_cert_local" "ssl_cert_local" {
+  action          = "import"
+  certificate_type = "pem"
+  dst_file        = "combined.pem"
+  file            = "combined.pem"
+  file_handle     = "/opt/terraform/project_A10Terraform-v2/certs/combined.pem"
+}
+
+resource "thunder_slb_template_client_ssl" "ssl_template" {
+  name = "a10labssltemplate"
+
+  certificate_list {
+    cert       = thunder_file_ssl_cert_local.ssl_cert_local.dst_file
+    key        = thunder_file_ssl_cert_local.ssl_cert_local.dst_file
+    passphrase = ""  # Include the passphrase if your key file is encrypted
+    #shared     = 1   # Set to 1 if the certificate/key is in a shared partition
+  }
+
+  # Include any additional required properties for the SSL template
+}
+
+  # Include any additional required properties for the SSL template
+
+
+  # Include any additional required properties for the SSL template
+*/
+
+
+
+/*
+  resource "thunder_file_ssl_cert_local" "thunder_file_ssl_cert_local" {
+  action              = "import"
+  certificate_type    = "pem"
+  dst_file            = "10tflab_nordstrom_app.pem"
+  file                = "10tflab_nordstrom_app.pem"
+  file_handle         = "/opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.pem"
+}
+
+resource "thunder_file_ssl_key_local" "thunder_file_ssl_key_local" {
+  action      = "import"
+  dst_file    = "a10tflab_nordstrom_app.key"
+  file        = "10tflab_nordstrom_app.key"
+  file_handle = "/opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.key"
+  secured     = 0
+}
+
+resource "thunder_slb_template_client_ssl" "ssl_template" {
+  name      = "a10labssltemplate"
+  certificate_list {
+    cert       = thunder_file_ssl_cert_local.thunder_file_ssl_cert_local.dst_file
+    chain_cert = thunder_file_ssl_cert_local.thunder_file_ssl_cert_local.dst_file  
+    key        = "a10tflab_nordstrom_app.key"  # Use the name as known to the A10 device
+    #cert       = thunder_file_ssl_cert_local.thunder_file_ssl_cert_local.dst_file
+    #key        = thunder_file_ssl_key_local.thunder_file_ssl_key_local.dst_file
+    #key        = thunder_file_ssl_key_local.thunder_file_ssl_key_local.dst_file
+    passphrase = ""  # Include the passphrase if your key file is encrypted
+    shared     = 1   # Since you mentioned using a shared partition, setting this to 1 to indicate true.
+    # The 'shared' attribute is optional and should be included if the certificate/key is in a shared partition
+  }
+
+}
+
+  #certificate_list {
+  #  cert       = "a10tflab_nordstrom_app.pem"
+   # key        = "a10tflab_nordstrom_app.key"
+    #passphrase = ""  # Include the passphrase if your key file is encrypted
+    # The 'shared' attribute is optional and should be included if the certificate/key is in a shared partition
+    #}
+
+*/
+
+resource "thunder_file_ssl_cert_local" "ssl_cert_local" {
+  action          = "import"
+  certificate_type = "pem"
+  dst_file        = "a10tflab_nordstrom_app.pem"
+  file            = "a10tflab_nordstrom_app.pem"
+  file_handle     = "/opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.pem"
+}
+
+resource "thunder_file_ssl_key_local" "ssl_key_local" {
+  action      = "import"
+  dst_file    = "a10tflab_nordstrom_app.key"
+  file        = "a10tflab_nordstrom_app.key"
+  file_handle = "/opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.key"
+}
+
+resource "thunder_slb_template_client_ssl" "ssl_template" {
+  name = "a10labssltemplate"
+
+  certificate_list {
+    cert       = thunder_file_ssl_cert_local.ssl_cert_local.dst_file
+    key        = thunder_file_ssl_key_local.ssl_key_local.dst_file
+    passphrase = ""  # Include the passphrase if your key file is encrypted
+    #shared     = 1   # Set to 1 if the certificate/key is in a shared partition
+  }
+
+  # Include any additional required properties for the SSL template
+}
+
+
+
+*******
+# Inside modules/certs/outputs.tf
+
+
+output "ssl_template" {
+  value = thunder_slb_template_client_ssl.ssl_template.name
+}
+
+*********
+
+terraform {
+  required_providers {
+    thunder = {
+      source  = "a10networks/thunder"
+      version = "1.4.1"
+    }
+  }
+}
+*****
+variable "config" {
+  description = "Configuration for the project."
+  type        = any
+}
+*******
+locals {
+  # Preprocess the port list to include an SSL template for port 443
+  processed_port_list = [for port in var.config.vip.port_list : {
+    port_number   = port.port_number
+    protocol      = port.protocol
+    service_group = port.service_group
+    ssl_template  = port.port_number == 443 ? var.ssl_template : null
+  }]
+}
+
+/*
+resource "thunder_slb_template_client_ssl" "ssl_template" {
+  name = "a10labssltemplate"
+  # other required attributes...
+}
+*/
+
+
+resource "thunder_slb_virtual_server" "virtual_server" {
+  name       = var.config.vip.name
+  ip_address = var.config.vip.ip_address
+  
+
+
+  dynamic "port_list" {
+    for_each = local.processed_port_list
+    content {
+      port_number   = port_list.value.port_number
+      protocol      = port_list.value.protocol
+      service_group = var.service_groups_info[port_list.value.service_group].name
+      # Uncomment the line below and provide the correct SSL template name
+     # template_client_ssl = port_list.value.ssl_template != null ? thunder_slb_template_client_ssl.ssl_template.name : null
+      auto          = 1
+      action        = "enable"
+      
+      # Apply the SSL template for HTTPS port
+      template_client_ssl = port_list.value.ssl_template
+      
+      aflex_scripts {
+        aflex = "my_aflex_scripts"
+      }
+    }
+  }
+}
+
+resource "thunder_file_aflex_local" "aflex_script" {
+  action      = "import"
+  dst_file    = "my_aflex_scripts"
+  file        = "my_aflex_scripts"
+  file_handle = "${path.module}/script.aflex"
+  skip_backup = 0
+}
+******
+# Inside modules/vips/variables.tf
+
+variable "config" {
+  description = "Configuration for VIPs."
+  type        = any
+}
+
+variable "service_groups_info" {
+  description = "Mapping of service group names to their attributes."
+  type = map(object({
+    name = string
+    # Add other attributes here as necessary
+  }))
+}
+
+
+variable "ssl_template" {
+  description = "Name of the SSL template."
+  type        = string
+}
+
+# Inside modules/vips/variables.tf
+
+#variable "aflex_script_path" {
+#  description = "Path to the aFlex script file."
+#  type        = string
+#}
+
+*******
+
+GOLD:
+https://registry.terraform.io/providers/a10networks/thunder/1.2.1/docs/resources/slb_template_client_ssl
+
+
+PDF URL to upload:
+https://askyourpdf.com/upload
+
+
+
+https://documentation.a10networks.com/IaC/Terraform/1_4_0/pdf/A10_TTP_1.4.1.pdf
+
+
+
+https://chromewebstore.google.com/detail/chatgpt-file-uploader/oaogphgfdbdbmhkiplemgehihiiececj
+
+:house_with_garden:  4:33 PM
+admin / crispybac0n!
+
+https://git.jwn.app/TM01026/APP05103-Infrastructure
+
+https://git.jwn.app/search?search=APP05103-Infrastructure&nav_source=navbar
+
+[Monday 4:28 PM] Hiatt, Steve
+https://jira.nordstrom.com/browse/NETSEC-3599
+Nordstrom :: ServiceNow
+[Monday 4:30 PM] Hiatt, Steve
+https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9994&quickFilter=78943
+Nordstrom :: ServiceNow
+[Monday 4:53 PM] Hiatt, Steve
+https://github.com/a10networks/terraform-provider-thunder/tree/master
+GitHub - a10networks/terraform-provider-thunder: terraform-provider-thunder
+terraform-provider-thunder. Contribute to a10networks/terraform-provider-thunder development by creating an account on GitHub.
+[Monday 4:54 PM] Ervin, Brian
+Standard Pipeline: https://developers.nordstromaws.app/docs/TM01090/app02944-customer-docs-doctails/pipeline/overview/
+[Monday 4:55 PM] Ervin, Brian
+^ the above is from the Dev Portal. There is a lot of details here around Nordstrom standards, how supported applications should be built, etc. 
+[Monday 5:00 PM] Ervin, Brian
+Example repo with Terraform for one of my team's apps deployed to AWS. State is managed by Gitlab: https://git.jwn.app/TM01327/NetworkConfigManager/APP08734-Infrastructure
+[Monday 5:10 PM] Hiatt, Steve
+afk for a sec. Bathroom
+[Monday 5:23 PM] Ervin, Brian
+https://composer.nordstromaws.app/
+[Monday 5:25 PM] Ervin, Brian
+TECH_NetworkSecurity
+[Monday 5:27 PM] Ervin, Brian
+Composer pack development guide: https://confluence.nordstrom.com/display/InfrastructureEnablement/Pack+Development
+Nordstrom :: ServiceNow
+[Monday 5:29 PM] Ervin, Brian
+Composer packs: https://git.jwn.app/TM01327/composer/APP07463-Packs
+
+Jira board for Netsec: https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9994&projectKey=NETSEC jira is used to monitor our work pertaining to efforts, projects, mini-projects/efforts. anything that is beyond the realm of SNow tickets or translating SNow ticket to tangible work.
+
+
+animesh.anand
+  1 day ago
+Confluence link to our SNAAP directory(that is our bigger team name): https://confluence.nordstrom.com/display/SNAAP/
+
+
+animesh.anand
+  1 day ago
+GitLab repo for netsec: https://git.jwn.app/TM00390
+
+
+animesh.anand
+  1 day ago
+Our ISS dashboard on SNow: https://nordstrom.service-now.com/nav_to.do?uri=%2F$pa_dashboard.do you can navigate to assigned users, team(our team assignment is Network Security -Tier 2).
+
+
+animesh.anand
+  1 day ago
+Group id: it is utilized for managing group/user-membership https://groupid.nordstrom.app/GroupID/Home/Index
+
+
+animesh.anand
+  1 day ago
+Nerds: it is a wonderful tool to understand about our tools/product. every product we support is assigned with a appid. https://nordstrom.service-now.com/nerds?spa=1&s=
+
+
+animesh.anand
+  1 day ago
+that's all i think is important and are frequently used enterprise tools
+
+Bradley Lund
+  6 days ago
+https://jira.nordstrom.com/secure/RapidBoard.jspa?rapidView=9582
+
+
+Bradley Lund
+  6 days ago
+Is our jira board. On the left hand side there is a stacked icon for backlog.
+
+
+Bradley Lund
+  6 days ago
+We have a meeting to review our backlog today, we should use the time to discuss automation priorities.
+
+
+Bradley Lund
+  6 days ago
+https://confluence.nordstrom.com/display/SNAAP/
+
+
+Bradley Lund
+  6 days ago
+Is our teams main page. We should grab some time and I'll show you around.
+Current and historical documentation is a little mixed.
+
+
+satish.chandra
+  6 days ago
+Thank you Bradley
+
+
+
+Availability: Listed on the Terraform Registry https://registry.terraform.io/namespaces/a10networks
+Capabilities: This provider offers basic functionalities for managing A10 load balancers. While it covers standard use cases, it might lack advanced features or specific customizations we require.
+Community-Driven Provider - a10networks/a10-terraform
+Availability: Hosted on GitHub https://github.com/a10networks/terraform-provider-thunder
+
+
+
+he lab a10 load balancer IP is 10.228.34.212
+10.228.34.193
+
+servers:
+  real_server_1:
+    name: "0990t05103hc01"
+    host: "10.230.72.133"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+  real_server_2:
+    name: "0990t05103hc02"
+    host: "10.230.72.139"
+    port_list:
+      - port_number: 80
+        protocol: "tcp"
+      - port_number: 443
+        protocol: "tcp"
+
+        you can see that they have a web service running, giving different responses
+
+https://github.com/a10networks/terraform-thunder-service-group-sync-nia
+https://github.com/a10networks/a10-terraform
+https://github.com/a10networks/terraform-provider-thunder
+https://github.com/a10networks/terraform-provider-thunder/tree/v1.4.1
+
+https://spacelift.io/blog/terraform-jenkins
+https://docs.gitlab.com/ee/user/infrastructure/iac/
+https://developer.hashicorp.com/terraform/tutorials/automation/github-actions
+
+https://github.com/a10networks/terraform-provider-thunder
+
+https://registry.terraform.io/providers/a10networks/thunder/latest/docs/resources/file_csr
+
+Important:
+https://documentation.a10networks.com/IaC/Terraform/1_4_1/html/ttp_Responsive_HTML5/Default.htm
+
+https://github.com/a10networks/terraform-provider-thunder/commit/530353f5c2d58891cdbfe94880af4efff63596a4
+
+https://documentation.a10networks.com/docs/IaC/Terraform/thunder-terraform-provider/1-4-0/
+
+Proof that it supports service partitions:
+1) Check the below link and navigate to 1.3.0
+https://documentation.a10networks.com/IaC/Terraform/1_4_1/html/ttp_Responsive_HTML5/Default.htm#ttp-TOC/1.3.0.htm%3FTocPath%3DWhat's%2520new%7C_____2
+2) Check the below link and navigate and readme.md under 1.3.0
+https://github.com/a10networks/terraform-provider-thunder
+
+page 224 & page 210,211t
+****
+https://chromewebstore.google.com/detail/universallychat-chatgpt-o/gmegeljejnflhdonjlgokhanebipjhoe
+Overview
+Open  with one simple shortcut on any website. Load PDF, Youtube videos & websites to discuss, summarize & ask questions.
+
+🎉 Turn into your own personal AI assistant on any website 💻
+
+💡 Use the shortcut Alt+u (Alt key is on Mac: ⌥ or option) to open ChatGPT on any website in your browser.
+Or customize the shortcut against one of your choice.
+
+📝 Load articles, web content, youtube videos, text files & PDFs
+Discuss, summarize & ask questions about loaded web content, youtube videos & PDFs directly in the chat.
+
+*****
+
+https://beebom.com/best-chatgpt-chrome-extensions/
+
+***** 
+
+
+
+wPQ8wBiu_paixkNsfCWN -Git access code
+
+var.a10_api_url
+  API URL for the A10 device
+
+  Enter a value: https://10.228.34.212/
+
+  10.228.34.212
+
+var.a10_password
+  Password for A10 API authentication
+
+  Enter a value: crispybac0n!
+
+  certtest
+  cat /opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.pem /opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.key > combined.pem
+  cat certificate.pem privatekey.pem > combined.pem
+
+scp /opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.pem admin@10.228.34.212:/tmp/
+scp /opt/terraform/project_A10Terraform-v2/certs/a10tflab_nordstrom_app.key admin@10.228.34.212:/tmp/
+
+var.a10_username
+  Username for A10 API authentication
+
+  Enter a value: admin
+
+provider.a10.address
+  Domain name/IP of the THUNDER
+
+  Enter a value: 10.228.34.212
+
+provider.a10.password
+  The user's password
+
+  Enter a value: crispybac0n!
+
+provider.a10.username
+  Username with API access to the THUNDER
+
+  Enter a value: admin
+
+provider "a10" {
+  api_url  = "https://10.228.34.212/axapi/v3/"
+  username = var.a10_username
+  password = var.a10_password
+}
+
+https://10.228.34.212///axapi/v3
+
+
+
+# Example correction for a virtual server resource
+resource "a10_virtual_server_v3" "vip" {
+  # Updated resource configuration here
+}
+
+Can you help me, for latest terraform 1.4.1, also i am on current release "TTP v1.4.0 release with support ACOS_6.0.2-P1", I would like to use a10networks/terraform-provider-vthunder and help me with a terraform code with main.tf file, providers.tf and variables.tf so that I can be able to create partition on A10 device, , I have my username as "admin" and password as "xxx" & my lab device is 10.228.34.212
+
+
+source ./creds.sh
+
+or 
+. ./creds.sh
+
+
+ok, I have created a user named certtest on 10.230.72.133, and the file is named a10tflab_nordstrom_app.pem
+Direct Message | Mar 18th | View conversation
+1:07
+the key is a10tflab.nordstrom.app.key
+
+
+Steve Hiatt
+:house_with_garden:  1:41 PM
+https://alb0319p11.nordstrom.net/
+
+
+Steve Hiatt
+:house_with_garden:  1:53 PM
+username: readonly
+
+
+
+crispybac0n!
+
+1:53
+and the same password we use for the lab load balancer admin
+
+sh-3.2# ls
+a10tflab_nordstrom_app.key	a10tflab_nordstrom_app.pem
+
+
+fix visual studio permissions issue
+satish.loyapally@LT-APLVKQDVW9KXM terraform % cd /Users/satish.loyapally/                        
+satish.loyapally@LT-APLVKQDVW9KXM ~ % chmod 777 project_A10Terraform-v2 
+satish.loyapally@LT-APLVKQDVW9KXM ~ % sudo chmod 777 project_A10Terraform-v2
+satish.loyapally@LT-APLVKQDVW9KXM Nordstrom Development % sudo chown -R satish.loyapally:staff project_A10Terraform-v2
+sudo chown -R satish.loyapally:staff project_A10Terraform-v2
+
+******
+
+Plan: 11 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.certs.thunder_file_ssl_cert_local.ssl_cert_local: Creating...
+module.certs.thunder_file_ssl_key_local.ssl_key_local: Creating...
+module.vips.thunder_file_aflex_local.aflex_script: Creating...
+module.servers.thunder_slb_server.server["0990t05103hc03"]: Creating...
+module.servers.thunder_slb_server.server["0990t05103hc01"]: Creating...
+module.servers.thunder_slb_server.server["0990t05103hc02"]: Creating...
+module.servers.thunder_slb_server.server["0990t05103hc04"]: Creating...
+module.certs.thunder_file_ssl_key_local.ssl_key_local: Creation complete after 0s [id=1]
+module.servers.thunder_slb_server.server["0990t05103hc02"]: Creation complete after 0s [id=0990t05103hc02]
+module.servers.thunder_slb_server.server["0990t05103hc01"]: Creation complete after 0s [id=0990t05103hc01]
+module.vips.thunder_file_aflex_local.aflex_script: Creation complete after 0s [id=1]
+module.certs.thunder_file_ssl_cert_local.ssl_cert_local: Creation complete after 0s [id=1]
+module.servers.thunder_slb_server.server["0990t05103hc03"]: Creation complete after 0s [id=0990t05103hc03]
+module.servers.thunder_slb_server.server["0990t05103hc04"]: Creation complete after 0s [id=0990t05103hc04]
+module.service_group.thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group1"]: Creating...
+module.service_group.thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group2"]: Creating...
+module.certs.thunder_slb_template_client_ssl.ssl_template: Creating...
+module.service_group.thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group2"]: Creation complete after 1s [id=a10tflab_nordstrom_net_service_group2]
+module.service_group.thunder_slb_service_group.service_group["a10tflab_nordstrom_net_service_group1"]: Creation complete after 1s [id=a10tflab_nordstrom_net_service_group1]
+module.certs.thunder_slb_template_client_ssl.ssl_template: Creation complete after 1s [id=a10labssltemplate]
+module.vips.thunder_slb_virtual_server.virtual_server: Creating...
+module.vips.thunder_slb_virtual_server.virtual_server: Creation complete after 0s [id=10tflab_nordstrom_net_virtual_server_1]
+
+Apply complete! Resources: 11 added, 0 changed, 0 destroyed.
+satish.loyapally@LT-APLVKQDVW9KXM project_A10Terraform-v2 % tree
+.
+├── Thunder_shared.txt
+├── config.yaml
+├── creds.sh
+├── main.tf
+├── modules
+│   ├── certs
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   ├── providers.tf
+│   │   ├── ssl
+│   │   │   ├── a10tflab_nordstrom_app.key
+│   │   │   └── a10tflab_nordstrom_app.pem
+│   │   └── variables.tf
+│   ├── servers
+│   │   ├── main.tf
+│   │   ├── providers.tf
+│   │   └── variables.tf
+│   ├── service_group
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   ├── providers.tf
+│   │   └── variables.tf
+│   └── vips
+│       ├── main.tf
+│       ├── providers.tf
+│       ├── script.aflex
+│       └── variables.tf
+├── notes
+│   ├── logging.txt
+│   ├── main.tf
+│   ├── mainbackup.tf
+│   ├── mainlastbackup.tf
+│   └── notes.txt
+├── providers.tf
+├── terraform.tfstate
+└── variables.tf
+
